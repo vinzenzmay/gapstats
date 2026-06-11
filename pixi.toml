@@ -14,8 +14,7 @@ pkg-config  = "*"
 c-compiler  = "*"
 cxx-compiler = "*"
 
-# Runtime + htslib build dependencies (htslib is auto-detected via pkg-config)
-htslib      = ">=1.20"
+# Runtime + htslib build dependencies (htslib is auto-detected when available)
 zlib        = "*"
 bzip2       = "*"
 xz          = "*"          # liblzma
