@@ -1,8 +1,8 @@
-[project]
+[workspace]
 name = "gapstats"
 version = "0.1.0"
 description = "Alignment gap & fragment-length QC statistics for BAM/CRAM files"
-channels = ["conda-forge"]
+channels = ["conda-forge", "bioconda"]
 platforms = ["linux-64"]
 
 [dependencies]
@@ -15,6 +15,7 @@ c-compiler  = "*"
 cxx-compiler = "*"
 
 # Runtime + htslib build dependencies (htslib is auto-detected when available)
+htslib      = ">=1.20"
 zlib        = "*"
 bzip2       = "*"
 xz          = "*"          # liblzma
@@ -26,14 +27,17 @@ lcov        = "*"
 
 [tasks]
 # ── Normal build ──────────────────────────────────────────────────────────────
-configure = "cmake -B build -DCMAKE_BUILD_TYPE=Release"
-build     = { cmd = "cmake --build build --parallel", depends-on = ["configure"] }
-test      = { cmd = "ctest --test-dir build --output-on-failure", depends-on = ["build"] }
-install   = { cmd = "cmake --install build --prefix $CONDA_PREFIX", depends-on = ["build"] }
-clean     = "rm -rf build build-cov"
+# Use build-pixi/ so this dir stays isolated from the standalone build/ dir.
+# CMAKE_PREFIX_PATH=$CONDA_PREFIX makes cmake prefer conda-provided libraries
+# (curl, zlib, htslib, etc.) over system libraries — critical inside pixi.
+configure = "cmake -B build-pixi -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+build     = { cmd = "cmake --build build-pixi --parallel", depends-on = ["configure"] }
+test      = { cmd = "ctest --test-dir build-pixi --output-on-failure", depends-on = ["build"] }
+install   = { cmd = "cmake --install build-pixi --prefix $CONDA_PREFIX", depends-on = ["build"] }
+clean     = "rm -rf build-pixi build-pixi-cov"
 
-# ── Coverage build (produces build-cov/coverage.info + coverage_html/) ───────
-configure-cov = "cmake -B build-cov -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"
-build-cov     = { cmd = "cmake --build build-cov --parallel", depends-on = ["configure-cov"] }
-test-cov      = { cmd = "ctest --test-dir build-cov --output-on-failure", depends-on = ["build-cov"] }
-coverage      = { cmd = "cmake --build build-cov --target coverage", depends-on = ["test-cov"] }
+# ── Coverage build ────────────────────────────────────────────────────────────
+configure-cov = "cmake -B build-pixi-cov -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+build-cov     = { cmd = "cmake --build build-pixi-cov --parallel", depends-on = ["configure-cov"] }
+test-cov      = { cmd = "ctest --test-dir build-pixi-cov --output-on-failure", depends-on = ["build-cov"] }
+coverage      = { cmd = "cmake --build build-pixi-cov --target coverage", depends-on = ["test-cov"] }
