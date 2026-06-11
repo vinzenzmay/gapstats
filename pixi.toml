@@ -1,0 +1,40 @@
+[project]
+name = "gapstats"
+version = "0.1.0"
+description = "Alignment gap & fragment-length QC statistics for BAM/CRAM files"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+# Build toolchain
+cmake       = ">=3.16"
+make        = ">=4"
+git         = ">=2"
+pkg-config  = "*"
+c-compiler  = "*"
+cxx-compiler = "*"
+
+# Runtime + htslib build dependencies (htslib is auto-detected via pkg-config)
+htslib      = ">=1.20"
+zlib        = "*"
+bzip2       = "*"
+xz          = "*"          # liblzma
+libcurl     = "*"
+libdeflate  = "*"
+
+# Test coverage
+lcov        = "*"
+
+[tasks]
+# ── Normal build ──────────────────────────────────────────────────────────────
+configure = "cmake -B build -DCMAKE_BUILD_TYPE=Release"
+build     = { cmd = "cmake --build build --parallel", depends-on = ["configure"] }
+test      = { cmd = "ctest --test-dir build --output-on-failure", depends-on = ["build"] }
+install   = { cmd = "cmake --install build --prefix $CONDA_PREFIX", depends-on = ["build"] }
+clean     = "rm -rf build build-cov"
+
+# ── Coverage build (produces build-cov/coverage.info + coverage_html/) ───────
+configure-cov = "cmake -B build-cov -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON"
+build-cov     = { cmd = "cmake --build build-cov --parallel", depends-on = ["configure-cov"] }
+test-cov      = { cmd = "ctest --test-dir build-cov --output-on-failure", depends-on = ["build-cov"] }
+coverage      = { cmd = "cmake --build build-cov --target coverage", depends-on = ["test-cov"] }
