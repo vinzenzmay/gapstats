@@ -62,6 +62,8 @@ if(NOT _HTSLIB_SYSTEM)
   message(STATUS "System htslib not found — building 1.21 from source")
   include(ExternalProject)
   find_package(ZLIB REQUIRED)
+  find_package(Threads REQUIRED)
+  find_package(OpenSSL REQUIRED)
   find_library(BZ2_LIB  NAMES bz2  REQUIRED)
   find_library(LZMA_LIB NAMES lzma REQUIRED)
   find_library(CURL_LIB NAMES curl REQUIRED)
@@ -93,6 +95,7 @@ if(NOT _HTSLIB_SYSTEM)
   target_link_libraries(htslib_dep INTERFACE
     "${HTSLIB_PREFIX}/lib/libhts.a"
     ZLIB::ZLIB ${BZ2_LIB} ${LZMA_LIB} ${CURL_LIB} deflate
+    Threads::Threads OpenSSL::Crypto
   )
 endif()
 
