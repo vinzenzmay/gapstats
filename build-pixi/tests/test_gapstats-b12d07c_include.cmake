@@ -1,0 +1,5 @@
+if(EXISTS "/home/vinzenz/dev/aln_qc/build-pixi/tests/test_gapstats-b12d07c_tests.cmake")
+  include("/home/vinzenz/dev/aln_qc/build-pixi/tests/test_gapstats-b12d07c_tests.cmake")
+else()
+  add_test(test_gapstats_NOT_BUILT-b12d07c test_gapstats_NOT_BUILT-b12d07c)
+endif()
