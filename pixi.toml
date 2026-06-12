@@ -3,7 +3,7 @@ name = "gapstats"
 version = "0.1.0"
 description = "Alignment gap & fragment-length QC statistics for BAM/CRAM files"
 channels = ["conda-forge", "bioconda"]
-workspace = ["linux-64"]
+platforms = ["linux-64"]
 
 [dependencies]
 # Build toolchain
